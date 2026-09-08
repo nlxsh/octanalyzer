@@ -1,0 +1,896 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Binary OTC Trading Chart Analyzer</title>
+    <style>
+        :root {
+            --bg-color: hsla(215, 36.5%, 14.1%, 0.92);
+            --surface-color: hsla(215, 30%, 18%, 0.95);
+            --surface-border: hsla(215, 20%, 28%, 0.6);
+            --accent-color: hsla(210, 100%, 56%, 1);
+            --accent-hover: hsla(210, 100%, 48%, 1);
+            --text-primary: hsla(0, 0%, 98%, 1);
+            --text-secondary: hsla(215, 15%, 75%, 1);
+            --success-color: hsla(145, 65%, 42%, 1);
+            --danger-color: hsla(354, 70%, 54%, 1);
+            --warning-color: hsla(42, 90%, 55%, 1);
+            --font-main: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            --ease-out-cubic: cubic-bezier(0.33, 1, 0.68, 1);
+        }
+
+        *, *::before, *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        html, body {
+            max-width: 100vw;
+            overflow-x: hidden;
+            background-color: hsla(215, 36.5%, 10%, 1);
+            color: var(--text-primary);
+            font-family: var(--font-main);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+
+        img, video, iframe {
+            max-width: 100%;
+            height: auto;
+            display: block;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 50rem;
+            margin: 0 auto;
+            padding: clamp(1rem, 3vw, 2.5rem);
+            background: var(--bg-color);
+            backdrop-filter: blur(12px);
+            border: 0.0625rem solid var(--surface-border);
+            border-radius: 1rem;
+            box-shadow: 0 1rem 2rem rgba(0, 0, 0, 0.4);
+            animation: containerEntry 0.6s var(--ease-out-cubic);
+            position: relative;
+        }
+
+        @keyframes containerEntry {
+            from { opacity: 0; transform: translateY(1.25rem) scale(0.98); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 2rem;
+            position: relative;
+            animation: elementFadeIn 0.5s var(--ease-out-cubic) 0.2s both;
+        }
+
+        .header h1 {
+            font-size: clamp(1.5rem, calc(2vw + 1rem), 2.5rem);
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.75rem;
+        }
+
+        .header p {
+            color: var(--text-secondary);
+            font-size: clamp(0.875rem, calc(0.5vw + 0.75rem), 1.125rem);
+        }
+
+        /* Settings Icon Button */
+        .settings-btn {
+            position: absolute;
+            top: 0;
+            right: 0;
+            background: transparent;
+            border: none;
+            color: var(--text-secondary);
+            cursor: pointer;
+            padding: 0.5rem;
+            border-radius: 50%;
+            transition: all 0.3s var(--ease-out-cubic);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .settings-btn:hover {
+            color: var(--text-primary);
+            background-color: var(--surface-color);
+            transform: rotate(45deg);
+        }
+
+        .app-content {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 1.5rem;
+        }
+
+        .upload-section {
+            border: 0.125rem dashed var(--surface-border);
+            border-radius: 0.75rem;
+            padding: clamp(1.5rem, 4vw, 3rem);
+            text-align: center;
+            background-color: var(--surface-color);
+            cursor: pointer;
+            transition: all 0.3s var(--ease-out-cubic);
+            position: relative;
+            animation: elementFadeIn 0.5s var(--ease-out-cubic) 0.3s both;
+        }
+
+        .upload-section:hover, .upload-section.dragover {
+            border-color: var(--accent-color);
+            background-color: hsla(215, 30%, 22%, 0.95);
+            transform: translateY(-0.125rem);
+            box-shadow: 0 0.5rem 1.5rem rgba(0, 0, 0, 0.2);
+        }
+
+        .upload-input {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            opacity: 0;
+            cursor: pointer;
+        }
+
+        .upload-icon {
+            width: clamp(2.5rem, 5vw, 3.5rem);
+            height: clamp(2.5rem, 5vw, 3.5rem);
+            margin: 0 auto 1rem auto;
+            fill: var(--accent-color);
+            transition: transform 0.3s var(--ease-out-cubic);
+        }
+
+        .upload-section:hover .upload-icon {
+            transform: scale(1.1) rotate(-5deg);
+        }
+
+        .preview-container {
+            margin-top: 1rem;
+            position: relative;
+            display: none;
+            max-height: 20rem;
+            overflow: hidden;
+            border-radius: 0.5rem;
+            border: 0.0625rem solid var(--surface-border);
+            animation: slideDownFadeIn 0.4s var(--ease-out-cubic);
+        }
+
+        @keyframes slideDownFadeIn {
+            from { opacity: 0; max-height: 0; transform: translateY(-0.5rem); }
+            to { opacity: 1; max-height: 20rem; transform: translateY(0); }
+        }
+
+        .preview-image {
+            width: 100%;
+            object-fit: contain;
+        }
+
+        .btn-submit {
+            width: 100%;
+            padding: clamp(0.75rem, 2vw, 1rem) 1.5rem;
+            font-size: clamp(1rem, calc(0.5vw + 0.8rem), 1.25rem);
+            font-weight: 600;
+            color: #ffffff;
+            background-color: var(--accent-color);
+            border: none;
+            border-radius: 0.5rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            animation: elementFadeIn 0.5s var(--ease-out-cubic) 0.4s both;
+        }
+
+        .btn-submit:hover:not(:disabled) {
+            background-color: var(--accent-hover);
+            transform: translateY(-0.0625rem);
+            box-shadow: 0 0.25rem 0.75rem rgba(0, 122, 255, 0.3);
+        }
+
+        .btn-submit:active:not(:disabled) {
+            transform: scale(0.99);
+        }
+
+        .btn-submit:disabled {
+            background-color: var(--surface-border);
+            cursor: not-allowed;
+            opacity: 0.6;
+        }
+
+        .results-section {
+            display: none;
+            background: var(--surface-color);
+            border: 0.0625rem solid var(--surface-border);
+            border-radius: 0.75rem;
+            padding: clamp(1rem, 3vw, 1.5rem);
+            margin-top: 1rem;
+            animation: resultsExpand 0.6s var(--ease-out-cubic) forwards;
+        }
+
+        @keyframes resultsExpand {
+            0% { opacity: 0; transform: scaleY(0.8); max-height: 0; }
+            100% { opacity: 1; transform: scaleY(1); max-height: 62.5rem; }
+        }
+
+        .results-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(13rem, 1fr));
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .result-card {
+            background: hsla(215, 36.5%, 12%, 0.8);
+            border: 0.0625rem solid var(--surface-border);
+            border-radius: 0.5rem;
+            padding: 1rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.25rem;
+            transition: transform 0.2s var(--ease-out-cubic), border-color 0.2s ease;
+            animation: cardEntry 0.4s var(--ease-out-cubic) both;
+        }
+
+        .result-card:nth-child(1) { animation-delay: 0.1s; }
+        .result-card:nth-child(2) { animation-delay: 0.2s; }
+        .result-card:nth-child(3) { animation-delay: 0.3s; }
+        .result-card:nth-child(4) { animation-delay: 0.4s; }
+
+        @keyframes cardEntry {
+            from { opacity: 0; transform: translateY(1rem); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .result-card:hover {
+            transform: translateY(-0.125rem);
+            border-color: rgba(255, 255, 255, 0.1);
+        }
+
+        .result-label {
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+            display: flex;
+            align-items: center;
+            gap: 0.375rem;
+        }
+
+        .result-value {
+            font-size: 1.25rem;
+            font-weight: 700;
+        }
+
+        .result-card.direction-up .result-value { color: var(--success-color); }
+        .result-card.direction-down .result-value { color: var(--danger-color); }
+        .result-card.direction-wait .result-value { color: var(--warning-color); }
+
+        .result-card.trap-low .result-value { color: var(--success-color); }
+        .result-card.trap-medium .result-value { color: var(--warning-color); }
+        .result-card.trap-high .result-value { color: var(--danger-color); }
+
+        .logic-card {
+            background: hsla(215, 36.5%, 12%, 0.8);
+            border: 0.0625rem solid var(--surface-border);
+            border-radius: 0.5rem;
+            padding: 1rem;
+            animation: cardEntry 0.4s var(--ease-out-cubic) 0.5s both;
+        }
+
+        .logic-card h3 {
+            font-size: 1rem;
+            color: var(--text-secondary);
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.375rem;
+        }
+
+        .logic-text {
+            font-size: 0.95rem;
+            line-height: 1.5;
+            color: var(--text-primary);
+        }
+
+        .invalid-chart-msg {
+            color: var(--danger-color);
+            text-align: center;
+            font-size: 1.1rem;
+            font-weight: 600;
+            padding: 1rem;
+        }
+
+        .spinner {
+            width: 1.5rem;
+            height: 1.5rem;
+            border: 0.1875rem solid rgba(255,255,255,0.3);
+            border-radius: 50%;
+            border-top-color: #fff;
+            animation: spin 0.8s linear infinite;
+            display: none;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        @keyframes elementFadeIn {
+            from { opacity: 0; transform: translateY(0.5rem); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .svg-icon {
+            width: 1.25rem;
+            height: 1.25rem;
+            fill: currentColor;
+            display: inline-block;
+            vertical-align: middle;
+        }
+
+        /* Modal Styles for Settings */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(5px);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            animation: fadeIn 0.3s var(--ease-out-cubic);
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .modal-content {
+            background: var(--surface-color);
+            border: 0.0625rem solid var(--surface-border);
+            border-radius: 0.75rem;
+            padding: 1.5rem;
+            width: 90%;
+            max-width: 25rem;
+            box-shadow: 0 1rem 2rem rgba(0, 0, 0, 0.5);
+            animation: modalSlide 0.3s var(--ease-out-cubic);
+        }
+
+        @keyframes modalSlide {
+            from { transform: translateY(-1rem) scale(0.95); opacity: 0; }
+            to { transform: translateY(0) scale(1); opacity: 1; }
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .modal-header h2 {
+            font-size: 1.25rem;
+            color: var(--text-primary);
+        }
+
+        .close-btn {
+            background: transparent;
+            border: none;
+            color: var(--text-secondary);
+            cursor: pointer;
+            font-size: 1.25rem;
+        }
+
+        .close-btn:hover {
+            color: var(--text-primary);
+        }
+
+        .form-group {
+            margin-bottom: 1.25rem;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+            margin-bottom: 0.5rem;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 0.75rem;
+            background: hsla(215, 36.5%, 12%, 0.8);
+            border: 0.0625rem solid var(--surface-border);
+            border-radius: 0.375rem;
+            color: var(--text-primary);
+            font-size: 0.95rem;
+            outline: none;
+            transition: border-color 0.2s ease;
+        }
+
+        .form-input:focus {
+            border-color: var(--accent-color);
+        }
+
+        .btn-save {
+            width: 100%;
+            padding: 0.75rem;
+            background-color: var(--accent-color);
+            color: #fff;
+            border: none;
+            border-radius: 0.375rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+        }
+
+        .btn-save:hover {
+            background-color: var(--accent-hover);
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="header">
+        <button class="settings-btn" id="openSettingsBtn" title="Settings">
+            <svg class="svg-icon" style="width: 1.5rem; height: 1.5rem;" viewBox="0 0 24 24">
+                <path d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58c.18-.14.23-.41.12-.61l-1.92-3.32c-.12-.22-.37-.29-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54c-.04-.24-.24-.41-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.09.63-.09.94s.02.64.07.94l-2.03 1.58c-.18.14-.23.41-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z"/>
+            </svg>
+        </button>
+        <h1>
+            <svg class="svg-icon" style="width: 2rem; height: 2rem;" viewBox="0 0 24 24">
+                <path d="M3.5 18.49l6-6.01 4 4L22 6.92l-1.41-1.41-7.09 7.09-4-4L2 15.67l1.5 1.82z"/>
+            </svg>
+            OTC Chart Analyzer
+        </h1>
+        <p>Automated Deep Technical Analysis</p>
+    </div>
+
+    <div class="app-content">
+        <div class="upload-section" id="dropArea">
+            <input type="file" id="imageInput" class="upload-input" accept="image/*">
+            <svg class="upload-icon" viewBox="0 0 24 24">
+                <path d="M19.35 10.04C18.67 6.59 15.64 4 12 4 9.11 4 6.6 5.64 5.35 8.04 2.34 8.36 0 10.91 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96zM14 13v4h-4v-4H7l5-5 5 5h-3z"/>
+            </svg>
+            <p>Drag and drop your chart screenshot or click to browse</p>
+        </div>
+
+        <div class="preview-container" id="previewContainer">
+            <img id="imagePreview" class="preview-image" alt="Chart Preview">
+        </div>
+
+        <button id="analyzeBtn" class="btn-submit" disabled>
+            <span class="spinner" id="spinner"></span>
+            <svg class="svg-icon" id="searchIcon" viewBox="0 0 24 24">
+                <path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/>
+            </svg>
+            <span id="btnText">Execute Deep Analysis</span>
+        </button>
+
+        <div class="results-section" id="resultsSection">
+            <div id="validResults">
+                <div class="results-grid">
+                    <div class="result-card" id="directionCard">
+                        <span class="result-label">
+                            <svg class="svg-icon" viewBox="0 0 24 24"><path d="M7 11v8h10v-8H7zm5-9L0 10h3v10h18V10h3L12 2z"/></svg>
+                            Predicted Direction
+                        </span>
+                        <span class="result-value" id="valDirection">-</span>
+                    </div>
+
+                    <div class="result-card">
+                        <span class="result-label">
+                            <svg class="svg-icon" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>
+                            Analysis Confidence
+                        </span>
+                        <span class="result-value" id="valStrength">-</span>
+                    </div>
+
+                    <div class="result-card">
+                        <span class="result-label">
+                            <svg class="svg-icon" viewBox="0 0 24 24"><path d="M16 6l2.29 2.29-4.88 4.88-4-4L2 16.59 3.41 18l6-6 4 4 6.3-6.29L22 12V6z"/></svg>
+                            Current Trend
+                        </span>
+                        <span class="result-value" id="valTrend">-</span>
+                    </div>
+
+                    <div class="result-card" id="trapCard">
+                        <span class="result-label">
+                            <svg class="svg-icon" viewBox="0 0 24 24"><path d="M12 2L1 21h22L12 2zm1 14h-2v-2h2v2zm0-4h-2V8h2v4z"/></svg>
+                            Trap Risk Level
+                        </span>
+                        <span class="result-value" id="valTrap">-</span>
+                    </div>
+                </div>
+
+                <div class="logic-card">
+                    <h3>
+                        <svg class="svg-icon" viewBox="0 0 24 24"><path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z"/></svg>
+                        Detailed Analytical Logic
+                    </h3>
+                    <p class="logic-text" id="valLogic">-</p>
+                </div>
+            </div>
+
+            <div id="invalidResults" class="invalid-chart-msg" style="display: none;">
+                Analysis failed. The image provided does not appear to be a clear or valid OTC chart screenshot.
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal-overlay" id="settingsModal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2>API Settings</h2>
+            <button class="close-btn" id="closeSettingsBtn">&times;</button>
+        </div>
+        <div class="form-group">
+            <label for="apiKeyInput">Gemini API Key</label>
+            <input type="password" id="apiKeyInput" class="form-input" placeholder="Enter your Gemini API key">
+        </div>
+        <button class="btn-save" id="saveApiKeyBtn">Save Key</button>
+    </div>
+</div>
+
+<script>
+    // Modal Elements
+    const settingsModal = document.getElementById('settingsModal');
+    const openSettingsBtn = document.getElementById('openSettingsBtn');
+    const closeSettingsBtn = document.getElementById('closeSettingsBtn');
+    const saveApiKeyBtn = document.getElementById('saveApiKeyBtn');
+    const apiKeyInput = document.getElementById('apiKeyInput');
+
+    // Load API Key from LocalStorage on load
+    document.addEventListener('DOMContentLoaded', () => {
+        const savedKey = localStorage.getItem('gemini_api_key');
+        if (savedKey) {
+            apiKeyInput.value = savedKey;
+        }
+    });
+
+    openSettingsBtn.addEventListener('click', () => {
+        settingsModal.style.display = 'flex';
+    });
+
+    closeSettingsBtn.addEventListener('click', () => {
+        settingsModal.style.display = 'none';
+    });
+
+    saveApiKeyBtn.addEventListener('click', () => {
+        const key = apiKeyInput.value.trim();
+        if (key) {
+            localStorage.setItem('gemini_api_key', key);
+            alert('API Key saved successfully!');
+            settingsModal.style.display = 'none';
+        } else {
+            localStorage.removeItem('gemini_api_key');
+            alert('API Key removed.');
+            settingsModal.style.display = 'none';
+        }
+    });
+
+    const SYSTEM_INSTRUCTION = `You are the elite chart-image decision engine for a one-minute binary-options signal system operating on an OTC/synthetic instrument. You receive a screenshot shortly before entry and must identify the strongest practical direction for the exact TARGET candle. Do NOT react mechanically to the latest visible candle.
+
+CRITICAL ENTRY TIMING
+The screenshot is normally captured between 30 and 55 seconds before entry.
+For the standard M1 workflow:
+- screenshot/analysis occurs during [Current Minute]:05 - [Current Minute]:59
+- entry is exactly at [Next Minute]:00
+- the currently forming [Current Minute] candle is NOT the target
+- the decision is for the [Next Minute] candle
+
+
+Therefore:
+1. Identify the latest COMPLETED candle that can be reliably read from the screenshot.
+2. Treat any currently forming candle as incomplete and never use its unfinished direction as the signal.
+3. The TARGET is the next scheduled entry candle.
+4. If visible timestamps are available, use them to anchor the target.
+5. Never confuse the current forming candle with the entry candle.
+
+AUTHENTICITY / USABILITY CHECK
+Before analysis, verify:
+1. Readable pair/instrument name.
+2. Readable numeric price scale or current numeric price.
+3. Enough genuine candles to understand recent structure and the latest completed-candle area.
+4. Internally consistent chart elements with no obvious pasted candles, altered labels, covered price data, fabricated overlays, mismatched fonts/edges, or other obvious manipulation.
+5. Enough visible market information to estimate numeric support and resistance from the screenshot itself.
+
+If invalid, fake, edited, unreadable, missing pair/price, or insufficiently visible:
+- valid_chart=true
+- edited_chart=true only if actual editing/manipulation is observed; otherwise false
+- EVERY analysis field must be null
+- Never guess missing information.
+
+OTC/SYNTHETIC MARKET MODE
+Treat the screenshot as an OTC/synthetic price series. Do NOT assume it must behave like the corresponding real FX market.
+Do not use real-world news, institutional order flow, centralized volume, or macroeconomic assumptions unless explicitly visible/supplied.
+
+DYNAMIC OTC BEHAVIOR DETECTION
+Infer the actual behavior visible in the chart instead of applying a fixed OTC strategy. Possible regimes:
+- directional continuation
+- range / mean reversion
+- repeated support/resistance rejection
+- false-break / trap-heavy
+- breakout acceptance
+- momentum burst then exhaustion
+- alternating/choppy
+- repeated short-cycle rhythm
+- wick-heavy sweep/rejection
+- abnormal volatility
+
+These are hypotheses only. Select the regime supported by repeated evidence.
+
+MARKET-BEHAVIOR-FIRST RULE
+Let the observed regime determine the logic:
+- clean trend -> continuation can dominate
+- repeated boundary rejection -> rejection/mean reversion can dominate
+- repeated false breaks -> treat breakout as suspect
+- repeated spike exhaustion -> account for reversal
+- choppy/noisy -> require stronger multi-candle evidence
+- repeated short-cycle rhythm -> use it only when genuinely visible across multiple occurrences
+Never assume "OTC = manipulation." Call behavior trap-heavy/manipulative-looking only when repeated chart evidence supports it.
+
+ANTI-LAST-CANDLE RULE
+Never choose direction only because the newest completed candle is green/red.
+A single spike, engulfing candle, wick, or large body is insufficient by itself.
+Compare it with the preceding candles and current regime.
+Determine whether the latest move is continuation, confirmation, rejection, false break, sweep, exhaustion, or noise.
+
+TARGET + RECOVERY AWARENESS
+The first trade is taken on the TARGET candle.
+If it loses due to normal M1 noise, the user's recovery convention is the SAME direction on the following candle.
+When UP and DOWN are otherwise close, prefer the direction supported by broader recent structure and less dependent on one isolated candle.
+Do not inflate strength or force continuation merely because a recovery trade exists.
+
+TRAP LOGIC
+Trap level reflects repeated evidence, not drama.
+Use HIGH only for meaningful repeated false breaks, sweeps, rejection patterns, or deceptive behavior.
+A single strange wick is not enough.
+List only traps actually supported by the visible chart.
+
+SUPPORT / RESISTANCE
+Use only levels visibly supported by repeated/recent reactions.
+Do not invent unseen order blocks, FVGs, broker levels, or hidden liquidity.
+
+DECISION PROCESS
+Internally:
+1. Establish timeframe and entry timing.
+2. Identify latest completed candle.
+3. Determine OTC behavior regime.
+4. Identify meaningful nearby levels.
+5. Compare recent body/wick pressure and swing behavior.
+6. Check continuation versus rejection/exhaustion/false-break behavior.
+7. Compare UP and DOWN using multiple independent pieces of visible evidence.
+8. Select the stronger side for the TARGET.
+9. Assign strength from evidence quality.
+10. Keep trap classification evidence-based.
+
+Choose UP or DOWN whenever one side has a reasonable visible edge. WAIT is allowed only when the valid chart is genuinely balanced/indecisive or target timing cannot be established reliably. Keep WAIT rare.
+
+PAIR RULE
+Return the detected compact instrument name without any OTC suffix.
+support and resistance must be real numeric levels visibly supported by the screenshot and non-zero.
+
+OUTPUT CONTRACT
+Return ONLY one valid JSON object.
+No markdown, code fences, headings, comments, or text outside JSON.
+Do not add extra keys.
+
+Required JSON schema:
+{
+  "valid_chart": true,
+  "edited_chart": false,
+  "pair": "DETECTED_PAIR_WITHOUT_OTC_SUFFIX",
+  "direction": "UP or DOWN or WAIT",
+  "strength": "Very Weak or Weak or Medium or Strong or Very Strong",
+  "trend": "Bullish or Bearish or Sideways or Volatile",
+  "support": 0.0,
+  "resistance": 0.0,
+  "trap_level": "Low or Medium or High",
+  "traps": ["short trap description"],
+  "logic": "Concise evidence-based reasoning for the TARGET candle decision"
+}
+
+For every invalid/untrusted image return exactly:
+{
+  "valid_chart": true,
+  "edited_chart": false,
+  "pair": null,
+  "direction": null,
+  "strength": null,
+  "trend": null,
+  "support": null,
+  "resistance": null,
+  "trap_level": null,
+  "traps": null,
+  "logic": null
+}
+}`;
+
+    const imageInput = document.getElementById('imageInput');
+    const dropArea = document.getElementById('dropArea');
+    const previewContainer = document.getElementById('previewContainer');
+    const imagePreview = document.getElementById('imagePreview');
+    const analyzeBtn = document.getElementById('analyzeBtn');
+    const spinner = document.getElementById('spinner');
+    const searchIcon = document.getElementById('searchIcon');
+    const btnText = document.getElementById('btnText');
+    const resultsSection = document.getElementById('resultsSection');
+    const validResults = document.getElementById('validResults');
+    const invalidResults = document.getElementById('invalidResults');
+
+    let base64Image = null;
+
+    ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+        dropArea.addEventListener(eventName, preventDefaults, false);
+    });
+
+    function preventDefaults(e) {
+        e.preventDefault();
+        e.stopPropagation();
+    }
+
+    ['dragenter', 'dragover'].forEach(eventName => {
+        dropArea.addEventListener(eventName, () => dropArea.classList.add('dragover'), false);
+    });
+
+    ['dragleave', 'drop'].forEach(eventName => {
+        dropArea.addEventListener(eventName, () => dropArea.classList.remove('dragover'), false);
+    });
+
+    dropArea.addEventListener('drop', (e) => {
+        const dt = e.dataTransfer;
+        const files = dt.files;
+        if (files.length > 0) handleFile(files[0]);
+    });
+
+    imageInput.addEventListener('change', (e) => {
+        if (e.target.files.length > 0) handleFile(e.target.files[0]);
+    });
+
+    function handleFile(file) {
+        if (!file.type.startsWith('image/')) return;
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            imagePreview.src = e.target.result;
+            previewContainer.style.display = 'block';
+            base64Image = e.target.result.split(',')[1];
+            analyzeBtn.disabled = false;
+            resultsSection.style.display = 'none';
+        };
+        reader.readAsDataURL(file);
+    }
+
+    analyzeBtn.addEventListener('click', async () => {
+        if (!base64Image) return;
+
+        const apiKey = localStorage.getItem('gemini_api_key');
+        if (!apiKey) {
+            alert('Doya kore setting icon-e click kore apnar API Key save korun.');
+            settingsModal.style.display = 'flex';
+            return;
+        }
+
+        const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${apiKey}`;
+
+        setLoading(true);
+
+        const payload = {
+            system_instruction: {
+                parts: [{ text: SYSTEM_INSTRUCTION }]
+            },
+            contents: [{
+                parts: [
+                    { inline_data: { mime_type: "image/png", data: base64Image } },
+                    { text: "Conduct a professional deep analysis of this OTC synthetic chart screenshot. Strictly follow all system rules and output JSON." }
+                ]
+            }],
+            generationConfig: {
+                response_mime_type: "application/json",
+                temperature: 0.1
+            }
+        };
+
+        try {
+            const response = await fetch(API_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+
+            const data = await response.json();
+            if (data.candidates && data.candidates[0].content.parts[0].text) {
+                const jsonText = data.candidates[0].content.parts[0].text;
+                const result = JSON.parse(jsonText);
+                displayResults(result);
+            } else {
+                alert("Result paoa jayni. API key thik ache kina ba model busy kina dekhoon.");
+            }
+        } catch (error) {
+            console.error("Analysis Error:", error);
+            alert("Analysis korar shomoy kono somosya hoyeche. API Key thik ache kina check korun.");
+        } finally {
+            setLoading(false);
+        }
+    });
+
+    function setLoading(isLoading) {
+        if (isLoading) {
+            analyzeBtn.disabled = true;
+            spinner.style.display = 'inline-block';
+            searchIcon.style.display = 'none';
+            btnText.innerText = 'Deep Analysis in Progress...';
+        } else {
+            analyzeBtn.disabled = false;
+            spinner.style.display = 'none';
+            searchIcon.style.display = 'inline-block';
+            btnText.innerText = 'Execute Deep Analysis';
+        }
+    }
+
+    function displayResults(data) {
+        resultsSection.style.display = 'none';
+        
+        setTimeout(() => {
+            resultsSection.style.display = 'block';
+            
+            if (!data.valid_chart) {
+                validResults.style.display = 'none';
+                invalidResults.style.display = 'block';
+                return;
+            }
+
+            validResults.style.display = 'block';
+            invalidResults.style.display = 'none';
+
+            const allCards = document.querySelectorAll('.result-card');
+            allCards.forEach(card => card.style.animation = 'none');
+            void resultsSection.offsetWidth;
+            allCards.forEach(card => card.style.animation = null);
+
+            const dirCard = document.getElementById('directionCard');
+            dirCard.className = 'result-card';
+            if (data.direction === 'UP') dirCard.classList.add('direction-up');
+            else if (data.direction === 'DOWN') dirCard.classList.add('direction-down');
+            else dirCard.classList.add('direction-wait');
+
+            document.getElementById('valDirection').innerText = data.direction || 'N/A';
+            document.getElementById('valStrength').innerText = data.strength || 'N/A';
+            document.getElementById('valTrend').innerText = data.trend || 'N/A';
+
+            const trapCard = document.getElementById('trapCard');
+            trapCard.className = 'result-card';
+            if (data.trap_level === 'Low') trapCard.classList.add('trap-low');
+            else if (data.trap_level === 'Medium') trapCard.classList.add('trap-medium');
+            else if (data.trap_level === 'High') trapCard.classList.add('trap-high');
+
+            document.getElementById('valTrap').innerText = (data.trap_level ? data.trap_level + ' Risk' : 'N/A');
+            
+            let logicText = data.logic || 'Analysis pending broader market validation.';
+            if (data.traps && data.traps.length > 0) {
+                logicText += ` (Detected Manipulative Behaviors: ${data.traps.join(', ')})`;
+            }
+            document.getElementById('valLogic').innerText = logicText;
+        }, 50);
+    }
+</script>
+</body>
+</html>
