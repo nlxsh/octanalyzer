@@ -1,166 +1,851 @@
 <!DOCTYPE html>
-<html lang="bn">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Material 3 Silver Display</title>
+    <title>Binary OTC Trading Chart Analyzer</title>
     <style>
-        /* CSS Reset & Material 3 Variables */
+        :root {
+            --bg-color: hsla(215, 36.5%, 14.1%, 0.92);
+            --surface-color: hsla(215, 30%, 18%, 0.95);
+            --surface-border: hsla(215, 20%, 28%, 0.6);
+            --accent-color: hsla(210, 100%, 56%, 1);
+            --accent-hover: hsla(210, 100%, 48%, 1);
+            --text-primary: hsla(0, 0%, 98%, 1);
+            --text-secondary: hsla(215, 15%, 75%, 1);
+            --success-color: hsla(145, 65%, 42%, 1);
+            --danger-color: hsla(354, 70%, 54%, 1);
+            --warning-color: hsla(42, 90%, 55%, 1);
+            --font-main: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            --ease-out-cubic: cubic-bezier(0.33, 1, 0.68, 1);
+        }
+
         *, *::before, *::after {
             box-sizing: border-box;
             margin: 0;
             padding: 0;
         }
 
-        :root {
-            /* Material 3 Silver & Dark Neutral Palette */
-            --m3-silver-base: #1c1d1f;
-            --m3-silver-container: #2b2d31;
-            --m3-pure-white: #ffffff;
-            --m3-elevation-surface: rgba(255, 255, 255, 0.05);
-            --m3-border-silver: rgba(220, 225, 230, 0.2);
-            --m3-glow-silver: rgba(230, 235, 240, 0.15);
-        }
-
         html, body {
             max-width: 100vw;
             overflow-x: hidden;
-            font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-            background-color: var(--m3-silver-base);
-            /* Material 3 Dynamic Animated Silver Background Gradient */
-            background-image: 
-                radial-gradient(circle at 20% 20%, rgba(180, 190, 200, 0.15) 0%, transparent 40%),
-                radial-gradient(circle at 80% 80%, rgba(140, 150, 165, 0.12) 0%, transparent 40%),
-                radial-gradient(circle at 50% 50%, rgba(220, 225, 235, 0.08) 0%, transparent 60%);
-            background-size: 150% 150%;
-            animation: silverBgShift 12s ease-in-out infinite alternate;
-            color: var(--m3-pure-white);
-        }
-
-        /* Full Screen Center Container */
-        .container {
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
+            background-color: hsla(215, 36.5%, 10%, 1);
+            color: var(--text-primary);
+            font-family: var(--font-main);
             min-height: 100vh;
-            width: 100%;
-            padding: clamp(1rem, 5vw, 3rem);
-            text-align: center;
-        }
-
-        /* Material 3 Card Container for Name */
-        .m3-silver-card {
-            background: var(--m3-elevation-surface);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            border: 1px solid var(--m3-border-silver);
-            border-radius: clamp(1.5rem, 4vw, 3rem);
-            padding: clamp(2rem, 6vw, 4.5rem) clamp(1.5rem, 5vw, 4rem);
-            box-shadow: 
-                0 20px 40px rgba(0, 0, 0, 0.4),
-                inset 0 1px 0 rgba(255, 255, 255, 0.2);
             display: flex;
             flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+
+        img, video, iframe {
+            max-width: 100%;
+            height: auto;
+            display: block;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 50rem;
+            margin: 0 auto;
+            padding: clamp(1rem, 3vw, 2.5rem);
+            background: var(--bg-color);
+            backdrop-filter: blur(12px);
+            border: 0.0625rem solid var(--surface-border);
+            border-radius: 1rem;
+            box-shadow: 0 1rem 2rem rgba(0, 0, 0, 0.4);
+            animation: containerEntry 0.6s var(--ease-out-cubic);
+            position: relative;
+        }
+
+        @keyframes containerEntry {
+            from { opacity: 0; transform: translateY(1.25rem) scale(0.98); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 2rem;
+            position: relative;
+            animation: elementFadeIn 0.5s var(--ease-out-cubic) 0.2s both;
+        }
+
+        .header h1 {
+            font-size: clamp(1.5rem, calc(2vw + 1rem), 2.5rem);
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            color: var(--text-primary);
+            display: flex;
             align-items: center;
             justify-content: center;
-            max-width: 90%;
-            animation: cardFloat 4s ease-in-out infinite alternate;
+            gap: 0.75rem;
         }
 
-        /* Pure White Animated Name */
-        .pure-white-name {
-            /* Pure White Color */
-            color: var(--m3-pure-white);
-            
-            /* Fluid Typography */
-            font-size: clamp(2.5rem, calc(1rem + 8vw), 7.5rem);
-            font-weight: 800;
-            letter-spacing: -0.02em;
-            line-height: 1.1;
-            word-break: break-word;
-
-            /* Silver Drop Shadow / Glow for Elegance */
-            text-shadow: 
-                0 0 20px var(--m3-glow-silver),
-                0 10px 30px rgba(0, 0, 0, 0.5);
-
-            margin-bottom: clamp(1rem, calc(0.5rem + 2vw), 2.5rem);
-            
-            /* Subtle Breathing Pulse Animation */
-            animation: textPulse 3s ease-in-out infinite alternate;
+        .header p {
+            color: var(--text-secondary);
+            font-size: clamp(0.875rem, calc(0.5vw + 0.75rem), 1.125rem);
         }
 
-        /* Emoji Styling and Animation */
-        .emoji {
-            font-size: clamp(3rem, calc(1.5rem + 6vw), 6rem);
-            display: inline-block;
+        /* Settings Icon Button */
+        .settings-btn {
+            position: absolute;
+            top: 0;
+            right: 0;
+            background: transparent;
+            border: none;
+            color: var(--text-secondary);
             cursor: pointer;
-            filter: drop-shadow(0 10px 15px rgba(0, 0, 0, 0.4));
-            animation: bounceEmoji 2.5s ease-in-out infinite;
-            user-select: none;
-            transition: transform 0.2s ease;
+            padding: 0.5rem;
+            border-radius: 50%;
+            transition: all 0.3s var(--ease-out-cubic);
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
 
-        .emoji:hover {
-            transform: scale(1.25) rotate(10deg);
+        .settings-btn:hover {
+            color: var(--text-primary);
+            background-color: var(--surface-color);
+            transform: rotate(45deg);
         }
 
-        /* Background & UI Animations */
-        @keyframes silverBgShift {
-            0% {
-                background-position: 0% 0%;
-            }
-            50% {
-                background-position: 100% 100%;
-            }
-            100% {
-                background-position: 0% 0%;
-            }
+        .app-content {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 1.5rem;
         }
 
-        @keyframes cardFloat {
-            0% {
-                transform: translateY(0px);
-            }
-            100% {
-                transform: translateY(-12px);
-            }
+        .upload-section {
+            border: 0.125rem dashed var(--surface-border);
+            border-radius: 0.75rem;
+            padding: clamp(1.5rem, 4vw, 3rem);
+            text-align: center;
+            background-color: var(--surface-color);
+            cursor: pointer;
+            transition: all 0.3s var(--ease-out-cubic);
+            position: relative;
+            animation: elementFadeIn 0.5s var(--ease-out-cubic) 0.3s both;
         }
 
-        @keyframes textPulse {
-            0% {
-                opacity: 0.95;
-                text-shadow: 0 0 15px var(--m3-glow-silver);
-            }
-            100% {
-                opacity: 1;
-                text-shadow: 0 0 35px rgba(255, 255, 255, 0.4);
-            }
+        .upload-section:hover, .upload-section.dragover {
+            border-color: var(--accent-color);
+            background-color: hsla(215, 30%, 22%, 0.95);
+            transform: translateY(-0.125rem);
+            box-shadow: 0 0.5rem 1.5rem rgba(0, 0, 0, 0.2);
         }
 
-        @keyframes bounceEmoji {
-            0%, 100% {
-                transform: translateY(0) scale(1);
-            }
-            50% {
-                transform: translateY(-18px) scale(1.08);
-            }
+        .upload-input {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            opacity: 0;
+            cursor: pointer;
+        }
+
+        .upload-icon {
+            width: clamp(2.5rem, 5vw, 3.5rem);
+            height: clamp(2.5rem, 5vw, 3.5rem);
+            margin: 0 auto 1rem auto;
+            fill: var(--accent-color);
+            transition: transform 0.3s var(--ease-out-cubic);
+        }
+
+        .upload-section:hover .upload-icon {
+            transform: scale(1.1) rotate(-5deg);
+        }
+
+        .preview-container {
+            margin-top: 1rem;
+            position: relative;
+            display: none;
+            max-height: 20rem;
+            overflow: hidden;
+            border-radius: 0.5rem;
+            border: 0.0625rem solid var(--surface-border);
+            animation: slideDownFadeIn 0.4s var(--ease-out-cubic);
+        }
+
+        @keyframes slideDownFadeIn {
+            from { opacity: 0; max-height: 0; transform: translateY(-0.5rem); }
+            to { opacity: 1; max-height: 20rem; transform: translateY(0); }
+        }
+
+        .preview-image {
+            width: 100%;
+            object-fit: contain;
+        }
+
+        .btn-submit {
+            width: 100%;
+            padding: clamp(0.75rem, 2vw, 1rem) 1.5rem;
+            font-size: clamp(1rem, calc(0.5vw + 0.8rem), 1.25rem);
+            font-weight: 600;
+            color: #ffffff;
+            background-color: var(--accent-color);
+            border: none;
+            border-radius: 0.5rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            animation: elementFadeIn 0.5s var(--ease-out-cubic) 0.4s both;
+        }
+
+        .btn-submit:hover:not(:disabled) {
+            background-color: var(--accent-hover);
+            transform: translateY(-0.0625rem);
+            box-shadow: 0 0.25rem 0.75rem rgba(0, 122, 255, 0.3);
+        }
+
+        .btn-submit:active:not(:disabled) {
+            transform: scale(0.99);
+        }
+
+        .btn-submit:disabled {
+            background-color: var(--surface-border);
+            cursor: not-allowed;
+            opacity: 0.6;
+        }
+
+        .results-section {
+            display: none;
+            background: var(--surface-color);
+            border: 0.0625rem solid var(--surface-border);
+            border-radius: 0.75rem;
+            padding: clamp(1rem, 3vw, 1.5rem);
+            margin-top: 1rem;
+            animation: resultsExpand 0.6s var(--ease-out-cubic) forwards;
+        }
+
+        @keyframes resultsExpand {
+            0% { opacity: 0; transform: scaleY(0.8); max-height: 0; }
+            100% { opacity: 1; transform: scaleY(1); max-height: 62.5rem; }
+        }
+
+        .results-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(13rem, 1fr));
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .result-card {
+            background: hsla(215, 36.5%, 12%, 0.8);
+            border: 0.0625rem solid var(--surface-border);
+            border-radius: 0.5rem;
+            padding: 1rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.25rem;
+            transition: transform 0.2s var(--ease-out-cubic), border-color 0.2s ease;
+            animation: cardEntry 0.4s var(--ease-out-cubic) both;
+        }
+
+        .result-card:nth-child(1) { animation-delay: 0.1s; }
+        .result-card:nth-child(2) { animation-delay: 0.2s; }
+        .result-card:nth-child(3) { animation-delay: 0.3s; }
+        .result-card:nth-child(4) { animation-delay: 0.4s; }
+
+        @keyframes cardEntry {
+            from { opacity: 0; transform: translateY(1rem); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .result-card:hover {
+            transform: translateY(-0.125rem);
+            border-color: rgba(255, 255, 255, 0.1);
+        }
+
+        .result-label {
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+            display: flex;
+            align-items: center;
+            gap: 0.375rem;
+        }
+
+        .result-value {
+            font-size: 1.25rem;
+            font-weight: 700;
+        }
+
+        .result-card.direction-up .result-value { color: var(--success-color); }
+        .result-card.direction-down .result-value { color: var(--danger-color); }
+        .result-card.direction-wait .result-value { color: var(--warning-color); }
+
+        .result-card.trap-low .result-value { color: var(--success-color); }
+        .result-card.trap-medium .result-value { color: var(--warning-color); }
+        .result-card.trap-high .result-value { color: var(--danger-color); }
+
+        .logic-card {
+            background: hsla(215, 36.5%, 12%, 0.8);
+            border: 0.0625rem solid var(--surface-border);
+            border-radius: 0.5rem;
+            padding: 1rem;
+            animation: cardEntry 0.4s var(--ease-out-cubic) 0.5s both;
+        }
+
+        .logic-card h3 {
+            font-size: 1rem;
+            color: var(--text-secondary);
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.375rem;
+        }
+
+        .logic-text {
+            font-size: 0.95rem;
+            line-height: 1.5;
+            color: var(--text-primary);
+        }
+
+        .invalid-chart-msg {
+            color: var(--danger-color);
+            text-align: center;
+            font-size: 1.1rem;
+            font-weight: 600;
+            padding: 1rem;
+        }
+
+        .spinner {
+            width: 1.5rem;
+            height: 1.5rem;
+            border: 0.1875rem solid rgba(255,255,255,0.3);
+            border-radius: 50%;
+            border-top-color: #fff;
+            animation: spin 0.8s linear infinite;
+            display: none;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        @keyframes elementFadeIn {
+            from { opacity: 0; transform: translateY(0.5rem); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .svg-icon {
+            width: 1.25rem;
+            height: 1.25rem;
+            fill: currentColor;
+            display: inline-block;
+            vertical-align: middle;
+        }
+
+        /* Modal Styles for Settings */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(5px);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            animation: fadeIn 0.3s var(--ease-out-cubic);
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .modal-content {
+            background: var(--surface-color);
+            border: 0.0625rem solid var(--surface-border);
+            border-radius: 0.75rem;
+            padding: 1.5rem;
+            width: 90%;
+            max-width: 25rem;
+            box-shadow: 0 1rem 2rem rgba(0, 0, 0, 0.5);
+            animation: modalSlide 0.3s var(--ease-out-cubic);
+        }
+
+        @keyframes modalSlide {
+            from { transform: translateY(-1rem) scale(0.95); opacity: 0; }
+            to { transform: translateY(0) scale(1); opacity: 1; }
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .modal-header h2 {
+            font-size: 1.25rem;
+            color: var(--text-primary);
+        }
+
+        .close-btn {
+            background: transparent;
+            border: none;
+            color: var(--text-secondary);
+            cursor: pointer;
+            font-size: 1.25rem;
+        }
+
+        .close-btn:hover {
+            color: var(--text-primary);
+        }
+
+        .form-group {
+            margin-bottom: 1.25rem;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+            margin-bottom: 0.5rem;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 0.75rem;
+            background: hsla(215, 36.5%, 12%, 0.8);
+            border: 0.0625rem solid var(--surface-border);
+            border-radius: 0.375rem;
+            color: var(--text-primary);
+            font-size: 0.95rem;
+            outline: none;
+            transition: border-color 0.2s ease;
+        }
+
+        .form-input:focus {
+            border-color: var(--accent-color);
+        }
+
+        .btn-save {
+            width: 100%;
+            padding: 0.75rem;
+            background-color: var(--accent-color);
+            color: #fff;
+            border: none;
+            border-radius: 0.375rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+        }
+
+        .btn-save:hover {
+            background-color: var(--accent-hover);
         }
     </style>
 </head>
 <body>
 
-    <main class="container">
-        <!-- Material 3 Surface Card -->
-        <div class="m3-silver-card">
-            <!-- Pure White Name -->
-            <h1 class="pure-white-name">FUCK YOU আগে মিস্ট্রি খাওয়া তার পর ঠিক হবে analyzer</h1>
-            
-            <!-- Emoji -->
-            <div class="emoji" role="img" aria-label="emoji">🖕</div>
-        </div>
-    </main>
+<div class="container">
+    <div class="header">
+        <button class="settings-btn" id="openSettingsBtn" title="Settings">
+            <svg class="svg-icon" style="width: 1.5rem; height: 1.5rem;" viewBox="0 0 24 24">
+                <path d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58c.18-.14.23-.41.12-.61l-1.92-3.32c-.12-.22-.37-.29-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54c-.04-.24-.24-.41-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.09.63-.09.94s.02.64.07.94l-2.03 1.58c-.18.14-.23.41-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z"/>
+            </svg>
+        </button>
+        <h1>
+            <svg class="svg-icon" style="width: 2rem; height: 2rem;" viewBox="0 0 24 24">
+                <path d="M3.5 18.49l6-6.01 4 4L22 6.92l-1.41-1.41-7.09 7.09-4-4L2 15.67l1.5 1.82z"/>
+            </svg>
+            OTC Chart Analyzer
+        </h1>
+        <p>Automated Deep Technical Analysis</p>
+    </div>
 
+    <div class="app-content">
+        <div class="upload-section" id="dropArea">
+            <input type="file" id="imageInput" class="upload-input" accept="image/*">
+            <svg class="upload-icon" viewBox="0 0 24 24">
+                <path d="M19.35 10.04C18.67 6.59 15.64 4 12 4 9.11 4 6.6 5.64 5.35 8.04 2.34 8.36 0 10.91 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96zM14 13v4h-4v-4H7l5-5 5 5h-3z"/>
+            </svg>
+            <p>Drag and drop your chart screenshot or click to browse</p>
+        </div>
+
+        <div class="preview-container" id="previewContainer">
+            <img id="imagePreview" class="preview-image" alt="Chart Preview">
+        </div>
+
+        <button id="analyzeBtn" class="btn-submit" disabled>
+            <span class="spinner" id="spinner"></span>
+            <svg class="svg-icon" id="searchIcon" viewBox="0 0 24 24">
+                <path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/>
+            </svg>
+            <span id="btnText">Execute Deep Analysis</span>
+        </button>
+
+        <div class="results-section" id="resultsSection">
+            <div id="validResults">
+                <div class="results-grid">
+                    <div class="result-card" id="directionCard">
+                        <span class="result-label">
+                            <svg class="svg-icon" viewBox="0 0 24 24"><path d="M7 11v8h10v-8H7zm5-9L0 10h3v10h18V10h3L12 2z"/></svg>
+                            Predicted Direction
+                        </span>
+                        <span class="result-value" id="valDirection">-</span>
+                    </div>
+
+                    <div class="result-card">
+                        <span class="result-label">
+                            <svg class="svg-icon" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>
+                            Analysis Confidence
+                        </span>
+                        <span class="result-value" id="valStrength">-</span>
+                    </div>
+
+                    <div class="result-card">
+                        <span class="result-label">
+                            <svg class="svg-icon" viewBox="0 0 24 24"><path d="M16 6l2.29 2.29-4.88 4.88-4-4L2 16.59 3.41 18l6-6 4 4 6.3-6.29L22 12V6z"/></svg>
+                            Current Trend
+                        </span>
+                        <span class="result-value" id="valTrend">-</span>
+                    </div>
+
+                    <div class="result-card" id="trapCard">
+                        <span class="result-label">
+                            <svg class="svg-icon" viewBox="0 0 24 24"><path d="M12 2L1 21h22L12 2zm1 14h-2v-2h2v2zm0-4h-2V8h2v4z"/></svg>
+                            Trap Risk Level
+                        </span>
+                        <span class="result-value" id="valTrap">-</span>
+                    </div>
+                </div>
+
+                <div class="logic-card">
+                    <h3>
+                        <svg class="svg-icon" viewBox="0 0 24 24"><path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z"/></svg>
+                        Detailed Analytical Logic
+                    </h3>
+                    <p class="logic-text" id="valLogic">-</p>
+                </div>
+            </div>
+
+            <div id="invalidResults" class="invalid-chart-msg" style="display: none;">
+                Analysis failed. The image provided does not appear to be a clear or valid OTC chart screenshot.
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal-overlay" id="settingsModal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2>API Settings</h2>
+            <button class="close-btn" id="closeSettingsBtn">&times;</button>
+        </div>
+        <div class="form-group">
+            <label for="apiKeyInput">Gemini API Key</label>
+            <input type="password" id="apiKeyInput" class="form-input" placeholder="Enter your Gemini API key">
+        </div>
+        <button class="btn-save" id="saveApiKeyBtn">Save Key</button>
+    </div>
+</div>
+
+<script>
+    // Modal Elements
+    const settingsModal = document.getElementById('settingsModal');
+    const openSettingsBtn = document.getElementById('openSettingsBtn');
+    const closeSettingsBtn = document.getElementById('closeSettingsBtn');
+    const saveApiKeyBtn = document.getElementById('saveApiKeyBtn');
+    const apiKeyInput = document.getElementById('apiKeyInput');
+
+    // Load API Key from LocalStorage on load
+    document.addEventListener('DOMContentLoaded', () => {
+        const savedKey = localStorage.getItem('gemini_api_key');
+        if (savedKey) {
+            apiKeyInput.value = savedKey;
+        }
+    });
+
+    openSettingsBtn.addEventListener('click', () => {
+        settingsModal.style.display = 'flex';
+    });
+
+    closeSettingsBtn.addEventListener('click', () => {
+        settingsModal.style.display = 'none';
+    });
+
+    saveApiKeyBtn.addEventListener('click', () => {
+        const key = apiKeyInput.value.trim();
+        if (key) {
+            localStorage.setItem('gemini_api_key', key);
+            alert('API Key saved successfully!');
+            settingsModal.style.display = 'none';
+        } else {
+            localStorage.removeItem('gemini_api_key');
+            alert('API Key removed.');
+            settingsModal.style.display = 'none';
+        }
+    });
+
+    const SYSTEM_INSTRUCTION = `You are an Elite M1 OTC/Synthetic Chart Analyst — assumption-free, evidence-first, multi-candle, completed-candle-priority, context-driven, target-focused; objectively evaluate UP and DOWN, then select the strongest evidence-supported direction for the exact TARGET candle.
+
+
+CRITICAL ENTRY TIMING
+The screenshot is normally captured between 30 and 55 seconds before entry.
+ For the standard M1 workflow:
+   - The screenshot is analyzed during [Current Minute]:05–:59.
+   - The entry time is ALWAYS exactly [Next Minute]:00.
+   - The currently forming [Current Minute] candle is NEVER the target candle.
+   - The target is ALWAYS the [Next Minute]:00 candle.
+   - If a visible timestamp is available, use it to determine [Current Minute] and anchor the target precisely.
+   - The latest visible/partially formed candle must be treated as the running candle and must not be used as the target.
+   - Do not react mechanically to the latest visible candle during [Current Minute]:05–:59.
+
+  1. MARKET MODE
+   - Treat the instrument strictly as a broker-generated OTC/synthetic price series.
+   - Do not apply assumptions from the corresponding real-world market.
+   - Base conclusions only on observable chart behaviour.
+
+2. MARKET PATTERN & STRUCTURE
+   - Use all visible candles to understand the broader context, while giving the previous 4–7 fully completed candles primary weight for recent structure.
+   - Mandatory: determine whether the recent 4–7 candle sequence follows a recognizable logic, rhythm, structure, or evolving pattern, even when candle directions are mixed.
+   - Distinguish coherent, repeatable behaviour from genuinely erratic or incoherent movement.
+   - Identify the active behaviour pattern/regime only when supported by repeated multi-candle evidence.
+   - Treat the identified regime as a working hypothesis, not a certainty, and validate it against the broader visible structure.
+
+3. ANTI-LAST-CANDLE
+   - Never choose a direction solely from the newest completed candle.
+   - A single spike, engulfing body, wick, large body, or colour change is insufficient by itself.
+   - Interpret the latest completed candle only in relation to the preceding structure and active regime.
+   - Do not assign directional weight until its behaviour is supported or clarified by surrounding evidence.
+
+4. OTC BEHAVIOUR REGIME
+   - Consider directional continuation, range/mean reversion, repeated rejection, false-break/trap behaviour, breakout acceptance, momentum burst/exhaustion, alternating chop, short-cycle rhythm, wick-heavy sweeps, and abnormal volatility.
+   - These are hypotheses only; select the regime best supported by repeated evidence.
+   - Never label exhaustion, reversal, breakout, sweep, trap, or manipulation from an isolated event.
+   - Let the validated regime influence the interpretation of all other evidence rather than acting as an automatic signal.
+
+5. LEVELS & TRAPS
+   - Use only visibly established support/resistance confirmed by multiple reactions and read price values directly from the scale.
+   - Never invent unseen order blocks, fair value gaps, broker levels, hidden liquidity, or other invisible structures.
+   - Evaluate levels and traps in the context of the identified regime and broader visible structure.
+   - Rate trap behaviour HIGH only when repeated false breaks, sweeps, or deceptive rejections are clearly supported by multiple candles.
+
+6. DECISION PROCESS
+   - Establish entry timing and identify the exact TARGET candle.
+   - Use every visible candle as relevant context; use the previous 4–7 completed candles as the primary recent-structure window.
+   - Evaluate body/wick pressure, swings, momentum, rhythm, levels, regime behaviour, continuation, rejection, exhaustion, and false-break behaviour as interconnected evidence rather than isolated signals.
+   - Evaluate CALL and PUT independently using multiple non-redundant pieces of visible evidence.
+   - Prefer the direction whose evidence remains consistent across the recent structure, broader visible context, and validated regime.
+   - Select the strongest evidence-supported direction for the exact TARGET candle.
+   - Use WAIT only when the overall structure is genuinely high-risk or unresolved, with materially balanced/contradictory evidence and no defensible directional advantage.
+   - Normal noise, minor uncertainty, or ordinary candle variation must not trigger WAIT.
+   - Confidence must reflect evidence quality, not visual drama:
+     60–70 = limited or mixed structural evidence;
+     71–85 = solid multi-candle agreement;
+     86–99 = strong multi-factor confluence.
+     
+   OUTPUT CONTRACT
+Return ONLY one valid JSON object.
+No markdown, code fences, headings, comments, or text outside JSON.
+Do not add extra keys.
+
+Required JSON schema:
+{
+  "valid_chart": true,
+  "edited_chart": false,
+  "pair": "DETECTED_PAIR_WITHOUT_OTC_SUFFIX",
+  "direction": "UP or DOWN or WAIT",
+  "strength": "Very Weak or Weak or Medium or Strong or Very Strong",
+  "trend": "Bullish or Bearish or Sideways or Volatile",
+  "support": 0.0,
+  "resistance": 0.0,
+  "trap_level": "Low or Medium or High",
+  "traps": ["short trap description"],
+  "logic": "Concise evidence-based reasoning for the TARGET candle decision"
+}
+
+For every invalid/untrusted image return exactly:
+{
+  "valid_chart": false,
+  "edited_chart": true,
+  "pair": null,
+  "direction": null,
+  "strength": null,
+  "trend": null,
+  "support": null,
+  "resistance": null,
+  "trap_level": null,
+  "traps": null,
+  "logic": null
+}`;
+
+    const imageInput = document.getElementById('imageInput');
+    const dropArea = document.getElementById('dropArea');
+    const previewContainer = document.getElementById('previewContainer');
+    const imagePreview = document.getElementById('imagePreview');
+    const analyzeBtn = document.getElementById('analyzeBtn');
+    const spinner = document.getElementById('spinner');
+    const searchIcon = document.getElementById('searchIcon');
+    const btnText = document.getElementById('btnText');
+    const resultsSection = document.getElementById('resultsSection');
+    const validResults = document.getElementById('validResults');
+    const invalidResults = document.getElementById('invalidResults');
+
+    let base64Image = null;
+
+    ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+        dropArea.addEventListener(eventName, preventDefaults, false);
+    });
+
+    function preventDefaults(e) {
+        e.preventDefault();
+        e.stopPropagation();
+    }
+
+    ['dragenter', 'dragover'].forEach(eventName => {
+        dropArea.addEventListener(eventName, () => dropArea.classList.add('dragover'), false);
+    });
+
+    ['dragleave', 'drop'].forEach(eventName => {
+        dropArea.addEventListener(eventName, () => dropArea.classList.remove('dragover'), false);
+    });
+
+    dropArea.addEventListener('drop', (e) => {
+        const dt = e.dataTransfer;
+        const files = dt.files;
+        if (files.length > 0) handleFile(files[0]);
+    });
+
+    imageInput.addEventListener('change', (e) => {
+        if (e.target.files.length > 0) handleFile(e.target.files[0]);
+    });
+
+    function handleFile(file) {
+        if (!file.type.startsWith('image/')) return;
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            imagePreview.src = e.target.result;
+            previewContainer.style.display = 'block';
+            base64Image = e.target.result.split(',')[1];
+            analyzeBtn.disabled = false;
+            resultsSection.style.display = 'none';
+        };
+        reader.readAsDataURL(file);
+    }
+
+    analyzeBtn.addEventListener('click', async () => {
+        if (!base64Image) return;
+
+        const apiKey = localStorage.getItem('gemini_api_key');
+        if (!apiKey) {
+            alert('Doya kore setting icon-e click kore apnar API Key save korun.');
+            settingsModal.style.display = 'flex';
+            return;
+        }
+
+        const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash:generateContent?key=${apiKey}`;
+
+        setLoading(true);
+
+        const payload = {
+            system_instruction: {
+                parts: [{ text: SYSTEM_INSTRUCTION }]
+            },
+            contents: [{
+                parts: [
+                    { inline_data: { mime_type: "image/png", data: base64Image } },
+                    { text: "Conduct a professional deep analysis of this OTC synthetic chart screenshot. Strictly follow all system rules and output JSON." }
+                ]
+            }],
+            generationConfig: {
+                response_mime_type: "application/json",
+                temperature: 0.1
+            }
+        };
+
+        try {
+            const response = await fetch(API_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+
+            const data = await response.json();
+            if (data.candidates && data.candidates[0].content.parts[0].text) {
+                const jsonText = data.candidates[0].content.parts[0].text;
+                const result = JSON.parse(jsonText);
+                displayResults(result);
+            } else {
+                alert("Result paoa jayni. API key thik ache kina ba model busy kina dekhoon.");
+            }
+        } catch (error) {
+            console.error("Analysis Error:", error);
+            alert("Analysis korar shomoy kono somosya hoyeche. API Key thik ache kina check korun.");
+        } finally {
+            setLoading(false);
+        }
+    });
+
+    function setLoading(isLoading) {
+        if (isLoading) {
+            analyzeBtn.disabled = true;
+            spinner.style.display = 'inline-block';
+            searchIcon.style.display = 'none';
+            btnText.innerText = 'Deep Analysis in Progress...';
+        } else {
+            analyzeBtn.disabled = false;
+            spinner.style.display = 'none';
+            searchIcon.style.display = 'inline-block';
+            btnText.innerText = 'Execute Deep Analysis';
+        }
+    }
+
+    function displayResults(data) {
+        resultsSection.style.display = 'none';
+        
+        setTimeout(() => {
+            resultsSection.style.display = 'block';
+            
+            if (!data.valid_chart) {
+                validResults.style.display = 'none';
+                invalidResults.style.display = 'block';
+                return;
+            }
+
+            validResults.style.display = 'block';
+            invalidResults.style.display = 'none';
+
+            const allCards = document.querySelectorAll('.result-card');
+            allCards.forEach(card => card.style.animation = 'none');
+            void resultsSection.offsetWidth;
+            allCards.forEach(card => card.style.animation = null);
+
+            const dirCard = document.getElementById('directionCard');
+            dirCard.className = 'result-card';
+            if (data.direction === 'UP') dirCard.classList.add('direction-up');
+            else if (data.direction === 'DOWN') dirCard.classList.add('direction-down');
+            else dirCard.classList.add('direction-wait');
+
+            document.getElementById('valDirection').innerText = data.direction || 'N/A';
+            document.getElementById('valStrength').innerText = data.strength || 'N/A';
+            document.getElementById('valTrend').innerText = data.trend || 'N/A';
+
+            const trapCard = document.getElementById('trapCard');
+            trapCard.className = 'result-card';
+            if (data.trap_level === 'Low') trapCard.classList.add('trap-low');
+            else if (data.trap_level === 'Medium') trapCard.classList.add('trap-medium');
+            else if (data.trap_level === 'High') trapCard.classList.add('trap-high');
+
+            document.getElementById('valTrap').innerText = (data.trap_level ? data.trap_level + ' Risk' : 'N/A');
+            
+            let logicText = data.logic || 'Analysis pending broader market validation.';
+            if (data.traps && data.traps.length > 0) {
+                logicText += ` (Detected Manipulative Behaviors: ${data.traps.join(', ')})`;
+            }
+            document.getElementById('valLogic').innerText = logicText;
+        }, 50);
+    }
+</script>
 </body>
 </html>
